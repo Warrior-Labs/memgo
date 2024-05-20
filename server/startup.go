@@ -26,7 +26,6 @@ type MemgoServer struct {
 }
 
 func NewMemgoServer() (*MemgoServer, error) {
-	// Check if MEMGO_PORT is set, and revert to 8000 if not
 	port := "8000"
 
 	// Check if MEMGO_MAX_SIZE is set, and revert to 128M if not
