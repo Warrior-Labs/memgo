@@ -19,7 +19,6 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MemgoServiceClient interface {
-	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Write(ctx context.Context, in *WriteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*ReadResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -31,15 +30,6 @@ type memgoServiceClient struct {
 
 func NewMemgoServiceClient(cc grpc.ClientConnInterface) MemgoServiceClient {
 	return &memgoServiceClient{cc}
-}
-
-func (c *memgoServiceClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/memgopb.MemgoService/Login", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *memgoServiceClient) Write(ctx context.Context, in *WriteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
@@ -73,7 +63,6 @@ func (c *memgoServiceClient) Delete(ctx context.Context, in *DeleteRequest, opts
 // All implementations must embed UnimplementedMemgoServiceServer
 // for forward compatibility
 type MemgoServiceServer interface {
-	Login(context.Context, *LoginRequest) (*emptypb.Empty, error)
 	Write(context.Context, *WriteRequest) (*emptypb.Empty, error)
 	Read(context.Context, *ReadRequest) (*ReadResponse, error)
 	Delete(context.Context, *DeleteRequest) (*emptypb.Empty, error)
@@ -84,9 +73,6 @@ type MemgoServiceServer interface {
 type UnimplementedMemgoServiceServer struct {
 }
 
-func (UnimplementedMemgoServiceServer) Login(context.Context, *LoginRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
-}
 func (UnimplementedMemgoServiceServer) Write(context.Context, *WriteRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Write not implemented")
 }
@@ -107,24 +93,6 @@ type UnsafeMemgoServiceServer interface {
 
 func RegisterMemgoServiceServer(s grpc.ServiceRegistrar, srv MemgoServiceServer) {
 	s.RegisterService(&MemgoService_ServiceDesc, srv)
-}
-
-func _MemgoService_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LoginRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MemgoServiceServer).Login(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/memgopb.MemgoService/Login",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MemgoServiceServer).Login(ctx, req.(*LoginRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _MemgoService_Write_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -188,10 +156,6 @@ var MemgoService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "memgopb.MemgoService",
 	HandlerType: (*MemgoServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "Login",
-			Handler:    _MemgoService_Login_Handler,
-		},
 		{
 			MethodName: "Write",
 			Handler:    _MemgoService_Write_Handler,

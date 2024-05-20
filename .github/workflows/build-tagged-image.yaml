@@ -2,7 +2,8 @@ name: Push Tagged Docker Image
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - '*.*.*'
+      - 'latest'
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}

@@ -6,8 +6,10 @@ import (
 	"memgo/memgopb"
 	"memgo/server"
 	"net"
+	"os"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 func main() {
@@ -29,6 +31,25 @@ func main() {
 
 	// Set the gRPC Options
 	var opts []grpc.ServerOption
+
+	// Check that /x509/certificate.pem and /x509/key.pem files are present
+	tlsEnabled := true
+	if _, err := os.Stat("/x509/certificate.pem"); os.IsNotExist(err) {
+		tlsEnabled = false
+	}
+	if _, err := os.Stat("/x509/key.pem"); os.IsNotExist(err) {
+		tlsEnabled = false
+	}
+
+	if tlsEnabled {
+		// Load the TLS Certificates
+		creds, err := credentials.NewServerTLSFromFile("/x509/certificate.pem", "/x509/key.pem")
+		if err != nil {
+			log.Fatalln("unable to load TLS certificates: ", err.Error())
+		}
+		log.Println("TLS Enabled")
+		opts = append(opts, grpc.Creds(creds))
+	}
 
 	// Create the new gRPC Server
 	grpcServer := grpc.NewServer(opts...)

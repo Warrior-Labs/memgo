@@ -1,0 +1,8 @@
+# Bin directory
+bin/
+
+# Local x509 certificates
+x509/
+
+# Desktop files
+.DS_Store

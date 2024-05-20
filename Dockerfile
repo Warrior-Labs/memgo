@@ -1,9 +1,6 @@
 FROM golang:1.22 as builder
 WORKDIR /memgo
 
-# Check if MEMGO_PORT is set, if not set it to 8000
-ENV MEMGO_PORT=8000
-
 COPY . .
 RUN go mod download
 RUN GO111MODULE=on CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o memgo-server
@@ -18,4 +15,5 @@ WORKDIR /app
 COPY --from=builder /memgo/memgo-server .
 
 # Run the Executable
+EXPOSE 8000
 CMD  /app/memgo-server

@@ -11,8 +11,6 @@ import (
 
 type MemgoServer struct {
 	// Private fields for the server
-	user string
-	pass string
 	size uint64
 	m    runtime.MemStats
 
@@ -30,21 +28,6 @@ type MemgoServer struct {
 func NewMemgoServer() (*MemgoServer, error) {
 	// Check if MEMGO_PORT is set, and revert to 8000 if not
 	port := "8000"
-	if p := os.Getenv("MEMGO_PORT"); p != "" {
-		port = p
-	}
-
-	// Check if MEMGO_USER is set, and revert to "memgo" if not
-	user := "memgo"
-	if u := os.Getenv("MEMGO_USER"); u != "" {
-		user = u
-	}
-
-	// Check if MEMGO_PASSWORD is set, and revert to "memgo" if not
-	pass := "memgo"
-	if p := os.Getenv("MEMGO_PASSWORD"); p != "" {
-		pass = p
-	}
 
 	// Check if MEMGO_MAX_SIZE is set, and revert to 128M if not
 	size := "128M"
@@ -55,8 +38,6 @@ func NewMemgoServer() (*MemgoServer, error) {
 
 	// Create a new MemgoServer
 	s := &MemgoServer{
-		user:  user,
-		pass:  pass,
 		size:  sizeBytes,
 		Port:  port,
 		Pages: make(map[string]types.Page),
