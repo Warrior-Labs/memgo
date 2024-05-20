@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"memgo/grpcerrors"
 	"memgo/memgopb"
 	"memgo/ptr"
 	"memgo/types"
@@ -15,7 +16,11 @@ import (
 func (s *MemgoServer) Write(ctx context.Context, in *memgopb.WriteRequest) (*emptypb.Empty, error) {
 	// Validate the key
 	if err := s.validateKey(in.Key); err != nil {
-		return nil, err
+		return nil, grpcerrors.NewBadRequestError(
+			"key",
+			"invalid key",
+			err.Error(),
+		)
 	}
 
 	// Set the page value
@@ -27,7 +32,11 @@ func (s *MemgoServer) Write(ctx context.Context, in *memgopb.WriteRequest) (*emp
 	if in.ExpiresAt != nil {
 		// Make sure the time is at least 1 second in the future
 		if in.ExpiresAt.AsTime().Before(time.Now().Add(time.Second)) {
-			return nil, errors.New("expiration time must be at least 1 second in the future")
+			return nil, grpcerrors.NewBadRequestError(
+				"expires_at",
+				"invalid expiration time",
+				"expiration time must be at least 1 second in the future",
+			)
 		}
 		page.ExpiresAt = ptr.To(in.ExpiresAt.AsTime())
 	}
@@ -41,7 +50,9 @@ func (s *MemgoServer) Write(ctx context.Context, in *memgopb.WriteRequest) (*emp
 
 	// Check if the total memory usage is greater than the allowed size
 	if total > s.size {
-		return nil, errors.New("memory usage is greater than the allowed size")
+		return nil, grpcerrors.NewInternalServerError(
+			errors.New("memory usage is greater than the allowed size"),
+		)
 	}
 
 	// Set the page in the map
